@@ -1,0 +1,103 @@
+<!-- navbar.html -->
+
+<nav class="navbar navbar-expand-lg py-2 navbar-dark bg-primary shadow-sm">
+    <div class="container">
+        <a href="#" class="navbar-brand">
+            <!-- Logo Image -->
+            <img src="{{ url_for('static', filename='img/logonavrm.jpg') }}" width="50" height="50" alt="" class="d-inline-block align-middle mr-2">
+            <!-- Logo Text -->
+        </a>
+        <div>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a href="/home" class="nav-link text-light btn-custom">NGƯỜI DÙNG</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/fr_page" class="nav-link text-light btn-custom">MODULE</a>
+                </li>
+            
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-light btn-custom" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        DANH SÁCH CÂU HỎI
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="">MODULE 1</a>
+                        <a class="dropdown-item" href="">MODULE 2</a>
+                        <a class="dropdown-item" href="">MODULE 3</a>
+                        <a class="dropdown-item" href="">MODULE 4</a>
+                        <a class="dropdown-item" href="">MODULE 5</a>
+                        <a class="dropdown-item" href="">MODULE 6</a>
+                    </div>
+                </li>
+                
+            </ul>
+        </div>
+
+        {% if 'email' in session %}
+            <!-- Display greeting message with username if user is logged in -->
+            <span class="navbar-text text-light mr-3"><b>
+                Xin Chào, {{ session['email'] }}!</b>
+            </span><br>
+
+            <!-- Display logout button if user is logged in -->
+            <a href="{{ url_for('logout') }}" class="nav-link text-light btn-custom logout-btn">Đăng Xuất</a>
+        {% endif %}
+
+        <!-- Additional buttons -->
+
+    </div>
+</nav>
+
+<!-- Add a <style> tag in your HTML file or link to an external CSS file -->
+<style>
+
+    /* Custom styling for navigation bar buttons */
+    .navbar-nav .nav-link {
+        margin: 0 15px;
+        font-size: 16px;
+        border-radius: 15px;
+        padding: 10px 15px;
+        transition: background-color 0.3s ease-in-out;
+        /*background-color: #093ff3 !* Change to your desired hover color *!*/
+    }
+    .navbar-text + a {
+    margin-left: 10px; /* Khoảng cách giữa span và a */
+}
+
+    .logout-btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+}
+
+.logout-btn:hover {
+    background-color: rgba(163, 89, 89, 0.7); /* Change to your desired hover color */
+    border-color: rgba(109, 58, 58, 0.9); /* Change to your desired hover border color */
+}
+
+
+    .navbar-nav .nav-link:hover {
+        background-color: #b0e4fa /* Change to your desired hover color */
+    }
+
+    /* Style for the greeting message */
+    .navbar-text {
+        font-size: 16px;
+        margin-right: 15px;
+    }
+
+    /* Style for the logout button */
+    .btn-outline-light,
+    .btn-custom {
+        font-size: 16px;
+        border-radius: 5px;
+        padding: 10px 20px;
+        transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+    }
+
+    .btn-outline-light:hover,
+    .btn-custom:hover {
+        background-color: rgba(255, 0, 0, 0.7); /* Change to your desired hover color */
+        border-color: rgba(255, 0, 0, 0.9); /* Change to your desired hover border color */
+    }
+</style>

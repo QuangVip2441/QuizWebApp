@@ -1,10 +1,9 @@
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, url_for,  request, redirect, session
 import pyrebase
-from flask_login import UserMixin
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import InputRequired, Length, ValidationError
 
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'Qh2410.2'
 
 firebaseConfig = {
         'apiKey': "AIzaSyCH5xDaEk35SaFAZn7GO7x0tX2OE4DNySA",
@@ -19,19 +18,22 @@ firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
 
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'Qh2410.2'
-
-
-class LoginForm(FlaskForm):
-    email = StringField(validators=[InputRequired(), Length(min = 4, max=20)], render_kw={"placeholder": "Email"})
-    password = PasswordField(validators=[InputRequired(), Length(min = 4, max=20)], render_kw={"placeholder": "Password"})
-
-    submit = SubmitField("Login")
-@app.route('/login', methods = ['GET', 'POST'])
+@app.route('/', methods = ['GET', 'POST'])
 def login():
-    form = LoginForm()
-    return render_template('login.html', form = form)
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        try:
+            login = auth.sign_in_with_email_and_password(email,password)
+            session['logged_in'] = True
+            session['email'] = email                
+            # return redirect(url_for('index'))
+            return render_template('index.html')
+        except:
+            return 'Sai thông tin đăng nhập'
+    return render_template('login.html')
+       
 
 @app.route('/logout')
 def logout():
@@ -40,3 +42,6 @@ def logout():
 @app.route('/home')
 def Home():
     return "Home page"
+
+if __name__ == '__main__':
+    app.run(debug=True)

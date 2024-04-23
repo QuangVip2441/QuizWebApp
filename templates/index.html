@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include "head.html" %}
+
+    <!-- Include necessary CSS and JS files for DataTables -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
+
+    <style>
+    .wider-container {
+        max-width: 1400px; /* Adjust the max-width to your preference */
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .table-bordered {
+        border: 1px solid #e00000; /* Add a 1px solid border around the table */
+        border-collapse: collapse;
+    }
+
+    .form-bordered {
+        border: 1px solid #ddd; /* Add a 1px solid border around the form */
+        padding: 20px; /* Add some padding to the form */
+        border-radius: 8px; /* Optional: Add rounded corners */
+    }
+</style>
+</head>
+<body>
+
+{% include "navbar.html" %}
+
+</body>
+</html>
