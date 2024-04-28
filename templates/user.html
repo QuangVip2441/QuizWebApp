@@ -30,29 +30,47 @@
 </head>
 <body>
     {% include "navbar.html" %}
+<section class="py-1">
+    <div class="container mt-5 wider-container">
+        <div class="row">
+            <div class="col-lg-12 ">
+                <h2 class="text-center">Danh sách người dùng</h2>
+                <div class="row">
+                    <a href="/register" class="btn btn-success" style="margin-left: 40px;"><b>Thêm Người dùng</b></a>
+                </div>
+            </div>
+            <table class="table table-striped" id="dataTable" style="margin: 20px;">
+                <thead>
+                    <tr>
+                        <th>Số thứ tự</th>
+                        <th>Email</th>
+                        <th>Tên người dùng</th>
+                        <th>Mã số sinh viên</th>
+                        <th>Số điện thoại</th>
+                        <th>Thao tác dữ liệu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for item in data %}
+                    <tr>
+                        <td>{{ item.row_number }}</td>
+                        <td>{{ item.email  }}</td>
+                        <td>{{ item.username  }}</td>
+                        <td>{{ item.mssv  }}</td>
+                        <td>{{ item.phone }}</td>
+                        <td>
+                            <a href="" class="btn btn-warning btn-sm">Edit</a>
+                            <a href="" class="btn btn-danger btn-sm">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-    <h1 style="text-align: center;">Danh sách người dùng</h1>
-    <table class="table table-striped" id="dataTable" style="margin: 20px;">
-        <thead>
-            <tr>
-                <th>Số thứ tự</th>
-                <th>Email</th>
-                <th>Tên người dùng</th>
-                <th>Mã số sinh viên</th>
-                <th>Số điện thoại</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for item in data %}
-            <tr>
-                <td>{{ item.row_number }}</td>
-                <td>{{ item.email  }}</td>
-                <td>{{ item.username  }}</td>
-                <td>{{ item.mssv  }}</td>
-                <td>{{ item.phone }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+</section>
+    
+   
 </body>
 </html>

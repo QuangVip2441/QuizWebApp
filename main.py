@@ -42,6 +42,52 @@ def indexUser():
     return render_template('user.html', data=data)
 
 
+@app.route('/register')
+def register():
+    return render_template('insertUser.html')
+
+@app.route('/registered', methods=['POST'])
+def insertUser():
+    username = request.form['username']
+    email = request.form['email']
+    password = request.form['password']
+    mssv = request.form['mssv']
+    phone = request.form['phone']
+
+    if CheckexistsEmailandMSSV(email,mssv) != True :
+        return notifyexistsEmailandMSSV()
+    else:
+        try:
+            user = auth.create_user_with_email_and_password(email, password)
+            print("User created successfully!")
+        except Exception as e:
+            print("Error creating user:", e)
+
+        user_data = {
+            'username': username,
+            'email': email,
+            'mssv': mssv,
+            'phone': phone
+        }
+
+        db.collection('user').document(email).set(user_data)
+        return indexUser()
+
+@app.route('/notify')
+def notifyexistsEmailandMSSV():
+    return render_template('notify.html', message='Email hoặc mã số sinh viên đã tồn tại')
+
+def CheckexistsEmailandMSSV(email,mssv):
+    mssv_query = db.collection('user').where('mssv', '==', mssv)
+    mssv_docs = mssv_query.stream()
+
+    # Check if email is already registered
+    email_doc = db.collection('user').document(email).get()
+    if email_doc.exists:
+        return False
+    elif len(list(mssv_docs)) > 0:
+        return False
+    return True
 
 @app.route('/', methods = ['GET', 'POST'])
 def login():
