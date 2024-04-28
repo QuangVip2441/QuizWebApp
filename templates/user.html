@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User</title>
     {% include "head.html" %}
-
-    <!-- Include necessary CSS and JS files for DataTables -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
@@ -29,5 +30,29 @@
 </head>
 <body>
     {% include "navbar.html" %}
+
+    <h1 style="text-align: center;">Danh sách người dùng</h1>
+    <table class="table table-striped" id="dataTable" style="margin: 20px;">
+        <thead>
+            <tr>
+                <th>Số thứ tự</th>
+                <th>Email</th>
+                <th>Tên người dùng</th>
+                <th>Mã số sinh viên</th>
+                <th>Số điện thoại</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in data %}
+            <tr>
+                <td>{{ item.row_number }}</td>
+                <td>{{ item.email  }}</td>
+                <td>{{ item.username  }}</td>
+                <td>{{ item.mssv  }}</td>
+                <td>{{ item.phone }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 </body>
 </html>

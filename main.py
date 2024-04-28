@@ -1,5 +1,8 @@
 from flask import Flask, render_template, url_for,  request, redirect, session
 import pyrebase
+import firebase_admin
+from firebase_admin import credentials, firestore
+from jinja2 import Environment, FileSystemLoader
 
 
 app = Flask(__name__)
@@ -14,8 +17,30 @@ firebaseConfig = {
         'messagingSenderId': "119471279793",
         'appId': "1:119471279793:web:917393a11faa680aff5c90"
     }
+
+# Firebase auth
 firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
+
+# Firestore
+cred = credentials.Certificate("service-account-key.json")
+firebase_admin.initialize_app(cred)
+
+db = firestore.client()
+
+
+
+@app.route('/user')
+def indexUser():
+    collection_name = 'user'
+    docs = db.collection(collection_name).stream()  # Add parentheses to call the stream() method
+
+    data = []
+    for i, doc in enumerate(docs, start=1):
+        data.append({'row_number': i, **doc.to_dict()})
+
+    return render_template('user.html', data=data)
+
 
 
 @app.route('/', methods = ['GET', 'POST'])
@@ -43,5 +68,11 @@ def logout():
 def Home():
     return "Home page"
 
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+
