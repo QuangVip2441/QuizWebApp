@@ -20,18 +20,18 @@ firebaseConfig = {
         'appId': "1:119471279793:web:917393a11faa680aff5c90"
     }
 
-# Firebase auth
+# Firebase auth============================================================================================
 firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
 
-# Firestore
+# Firestore============================================================================================
 cred = credentials.Certificate("service-account-key.json")
 firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
 
-# Tạo số thứ tự trang user
+# Tạo số thứ tự trang user============================================================================================
 @app.route('/user')
 def indexUser():
     collection_name = 'user'
@@ -45,12 +45,12 @@ def indexUser():
 
     return render_template('user.html', data=data)
 
-# gọi trang thêm người dùng
+# gọi trang thêm người dùng============================================================================================
 @app.route('/register')
-def register():
+def register(): 
     return render_template('insertUser.html')
 
-#xử lý thêm người dùng
+#xử lý thêm người dùng============================================================================================
 @app.route('/registered', methods=['POST'])
 def insertUser():
     username = request.form['username']
@@ -78,21 +78,12 @@ def insertUser():
             # Redirect to indexUser or any other route after successful insertion
             return redirect(url_for('indexUser'))
 
-
-            
-
-            
-            
-       
-
-
-
-# thông báo sự tồn tại của email và mssv
+# thông báo sự tồn tại của email và mssv============================================================================================
 @app.route('/notify')
 def notifyexistsEmailandMSSV():
     return render_template('notify.html', message='Email hoặc mã số sinh viên đã tồn tại')
 
-# kiếm tra sự tồn tại của email và mssv
+# kiếm tra sự tồn tại của email và mssv============================================================================================
 def CheckexistsEmailandMSSV(email,mssv):
     mssv_query = db.collection('user').where('mssv', '==', mssv)
     mssv_docs = mssv_query.stream()
@@ -106,7 +97,7 @@ def CheckexistsEmailandMSSV(email,mssv):
         return False
     return True
 
-# xử lý login
+# xử lý login============================================================================================
 @app.route('/', methods = ['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -123,35 +114,20 @@ def login():
            return render_template('notify.html', message='Sai thông tin đăng nhập')
     return render_template('login.html')
        
-#Xử lý logout
+#Xử lý logout============================================================================================
 @app.route('/logout')
 def logout():
     return render_template('login.html')
 
 
-# gọi trang chủ
+# gọi trang chủ============================================================================================
 @app.route('/home')
 def Home():
     return "Home page"
 
-
-# gọi trang sửa người dùng và xử lý sửa người dùng
-@app.route("/user/<id>/edit" , methods=['GET', 'POST'])
-def user_edit(id):
-    if request.method == 'GET':
-        user_ref = db.collection("user").document(id)
-        user_data = user_ref.get().to_dict()
-
-        user = auth.get_user(id)
-        password_hash = user.tokens_valid_after_timestamp
-        
-
-        if user_data:
-            user_data['password_hash'] = password_hash
-            return render_template("editUser.html", user = user_data)
-        else:
-            return render_template('notify.html', message='Tài khoản không tồn tại')
-    elif request.method == 'POST':
+# xử lý sửa user=====================================================================================
+@app.route('/user/<id>', methods=['POST'])
+def user_edit_process(id):
         username = request.form["username"]
         email = request.form["email"]
         password = request.form["password"]
@@ -164,10 +140,12 @@ def user_edit(id):
 
         # Update user data in Firestore
         try:
-            user = auth.get_user_by_email(id)
-            user.update_email(email)
-            user.update_password(password)
-            print("User updated successfully!")
+            user = firebase_admin.auth.get_user(id)
+            firebase_admin.auth.update_user(
+            uid=user.uid,
+            email=email,
+            password=password
+    )
         except Exception as e:
             print("Error updating user:", e)
 
@@ -180,6 +158,38 @@ def user_edit(id):
 
         db.collection('user').document(id).set(user_data)
         return indexUser()
+
+# Hàm xử lý xóa ============================================
+@app.route('/delete_user/<id>', methods=['GET', 'POST'])
+def delete_user(id):
+    if request.method == 'GET':
+        # Render a confirmation form to delete the user
+        return render_template('delete_user.html', id=id)
+    elif request.method == 'POST':
+        # Delete the user if the form is submitted
+        try:
+            auth.delete_user(id)
+            return 'User deleted successfully!'
+        except Exception as e:
+            return 'Error deleting user: {}'.format(e)
+# gọi trang sửa người dùng và xử lý sửa người dùng============================================================================================
+@app.route('/user/<id>' , methods=['GET'])
+def user_edit(id):
+    if request.method == 'GET':
+        user = firebase_admin.auth.get_user(id)
+        password_hash = user.tokens_valid_after_timestamp
+        
+
+        user_ref = db.collection("user").document(id)
+        user_data = user_ref.get().to_dict()
+        
+        if user_data:
+            user_data['id'] = id
+            user_data['password_hash'] = password_hash
+            return render_template("editUser.html", user = user_data)
+        else:
+            return render_template('notify.html', message='Tài khoản không tồn tại')
+   
 
 
     username = request.form["username"]

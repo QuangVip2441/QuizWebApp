@@ -23,17 +23,18 @@ firebaseConfig = {
 firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
 
+print("Firebase Admin SDK version:", firebase_admin.__version__)
+print(firebase_admin)
+
+# def insertUser(email, password):
+#     try:
+#         user = auth.create_user_with_email_and_password(email, password)
+#         print("User created successfully!")
+#         print("User object:", user)
+#         user_id = user.localId
+#         print("User ID:", user_id)
+#     except Exception as e:
+#         print("Error creating user:", e)
 
 
-def insertUser(email, password):
-    try:
-        user = auth.create_user_with_email_and_password(email, password)
-        print("User created successfully!")
-        print("User object:", user)
-        user_id = user.localId
-        print("User ID:", user_id)
-    except Exception as e:
-        print("Error creating user:", e)
-
-
-insertUser("tan123@gmail.com", "Tan123")
+# insertUser("tan123@gmail.com", "Tan123")

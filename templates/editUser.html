@@ -100,7 +100,7 @@
 </style>
 </head>
 <body>
-    <form method="post" action="{{ url_for('user_edit', prs = user.email ) }}">
+    <form method="post" action="{{ url_for('user_edit_process', id=user.id ) }}">
        <B> <h2>Sửa thông tin người dùng</h2></B>
         <label for="username">Tên người dùng:</label>
         <input type="text" id="username" name="username" value="{{ user.username }}" required>
