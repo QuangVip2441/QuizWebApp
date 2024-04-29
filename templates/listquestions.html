@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang danh sách câu hỏi</title>
+    {% include "head.html" %}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
+
+    <style>
+    .wider-container {
+        max-width: 1400px; /* Adjust the max-width to your preference */
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .table-bordered {
+        border: 1px solid #e00000; /* Add a 1px solid border around the table */
+        border-collapse: collapse;
+    }
+
+    .form-bordered {
+        border: 1px solid #ddd; /* Add a 1px solid border around the form */
+        padding: 20px; /* Add some padding to the form */
+        border-radius: 8px; /* Optional: Add rounded corners */
+    }
+</style>
+</head>
+<body>
+    {% include "navbar.html" %}
+<section class="py-1">
+    <div class="container mt-5 wider-container">
+        <div class="row">
+            <div class="col-lg-12 ">
+                <h2 class="text-center">Danh sách Các Câu Hỏi</h2>
+                <div class="row">
+                    <a href="" class="btn btn-success" style="margin-left: 40px;"><b>Thêm Câu Hỏi</b></a>
+                </div>
+                
+            </div>
+            <table class="table table-striped" id="dataTable" style="margin: 20px;">
+                <thead>
+                    <tr>
+                        <th>Số thứ tự</th>
+                        <th>Nội dung câu hỏi</th>
+                        <th>Đáp án đúng</th>
+                        {% set num_options = data|first|length %}
+                        {% for i in range(num_options) %}
+                            {% if i < 4 %}
+                                <th>Đáp án {{ i+1 }}</th>
+                            {% endif %}
+                        {% endfor %}
+                        <th>Thao tác dữ liệu</th>
+                    </tr>
+                    
+                </thead>
+                <tbody>
+                {% for item in data %}
+                    <tr>
+                        <td>{{ item.row_number }}</td>
+                        <td>{{ item.content }}</td>
+                        <td>{{ item.correct }}</td>
+                        {% for ans in item.choices %}
+                            <td>{{ ans.answer }}</td>
+                        {% endfor %}
+                        <td>
+                            <a href="" class="btn btn-warning btn-sm">Edit</a>
+                            <a href="" class="btn btn-danger btn-sm">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            
+        </div>
+    </div>
+
+</section>
+</body>
+</html>

@@ -270,9 +270,23 @@ def module_edit(id):
     user_ref.set(user_data)
 
     return redirect(url_for("user", username=email))
+# Gọi trang danh sách các câu hỏi=================================================================
+@app.route('/questions/<id>' , methods=['GET'])
+def list_question(id):
+    if request.method == 'GET':
 
+        collection_name = 'module'
+        collection_questions = 'questions'
+        
+        docs = db.collection(collection_name).document(id).collection(collection_questions).stream()  # Add parentheses to call the stream() method
 
+        data = []
+        for i, doc in enumerate(docs, start=1):
+            doc_data = doc.to_dict()
+            doc_data['id'] = doc.id  # Add the document ID to the data dictionary
+            data.append({'row_number': i, **doc_data})
 
+        return render_template('listquestions.html', data=data)
 
 # HÀM NÀY XỬ LÝ BẮT BUỘC PHẢI LOGIN ,NẾU KHÔNG SẼ KHÔNG VÀO ĐƯỢC HỆ THỐNG
 # def login_required(f):
