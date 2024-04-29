@@ -30,6 +30,20 @@ firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
+#Trang danh sách module =================================================================================
+@app.route('/module')
+def indexModule():
+    collection_name = 'module'
+    docs = db.collection(collection_name).stream()
+
+    data = []
+    for i, doc in enumerate(docs, start=1):
+        doc_data = doc.to_dict()
+        doc_data['id'] = doc.id  # Add the document ID to the data dictionary
+        data.append({'row_number': i, **doc_data})
+
+    return render_template('module.html', data=data)
+
 
 # Tạo số thứ tự trang user============================================================================================
 @app.route('/user')
@@ -159,19 +173,49 @@ def user_edit_process(id):
         db.collection('user').document(id).set(user_data)
         return indexUser()
 
+# xử lý sửa module=====================================================================================
+@app.route('/module/<id>', methods=['POST'])
+def module_edit_process(id):
+        name = request.form["name"]
+        introduction = request.form["introduction"]
+        numberQuestions = request.form["numberQuestions"]
+        
+
+        # Validate form data
+        if not name or not introduction or not numberQuestions:
+           return render_template('notify.html', message='Nội dung chưa đủ')
+
+        # Update user data in Firestore
+
+        module_data = {
+            'name': name,
+            'introduction': introduction,
+            'numberQuestions': numberQuestions
+        }
+
+        db.collection('module').document(id).set(module_data)
+        return indexModule()
 # Hàm xử lý xóa ============================================
-@app.route('/delete_user/<id>', methods=['GET', 'POST'])
+@app.route('/delete/<id>', methods=['GET'])
 def delete_user(id):
-    if request.method == 'GET':
-        # Render a confirmation form to delete the user
-        return render_template('delete_user.html', id=id)
-    elif request.method == 'POST':
-        # Delete the user if the form is submitted
-        try:
-            auth.delete_user(id)
-            return 'User deleted successfully!'
-        except Exception as e:
-            return 'Error deleting user: {}'.format(e)
+    return '''
+        <script>
+            if (confirm("Are you sure you want to delete user {0}?")) {{
+                window.location.href = "/delete_confirm/{0}";
+            }} else {{
+                window.location.href = "/";
+            }}
+        </script>
+    '''.format(id)
+
+@app.route('/delete_confirm/<id>', methods=['GET'])
+def delete_user_confirm(id):
+    try:
+        firebase_admin.auth.delete_user(id)
+        db.collection('user').document(id).delete()
+        return indexUser()
+    except Exception as e:
+        return 'Error deleting user: {}'.format(e)
 # gọi trang sửa người dùng và xử lý sửa người dùng============================================================================================
 @app.route('/user/<id>' , methods=['GET'])
 def user_edit(id):
@@ -190,6 +234,19 @@ def user_edit(id):
         else:
             return render_template('notify.html', message='Tài khoản không tồn tại')
    
+# Gọi trang sửa Module và xử lý Module==================================================================
+@app.route('/module/<id>' , methods=['GET'])
+def module_edit(id):
+    if request.method == 'GET':
+
+        module_ref = db.collection("module").document(id)
+        module_data = module_ref.get().to_dict()
+        
+        if module_data:
+            module_data['id'] = id
+            return render_template("editModule.html", module = module_data)
+        else:
+            return render_template('notify.html', message='Module không tồn tại')
 
 
     username = request.form["username"]
@@ -213,6 +270,9 @@ def user_edit(id):
     user_ref.set(user_data)
 
     return redirect(url_for("user", username=email))
+
+
+
 
 # HÀM NÀY XỬ LÝ BẮT BUỘC PHẢI LOGIN ,NẾU KHÔNG SẼ KHÔNG VÀO ĐƯỢC HỆ THỐNG
 # def login_required(f):
