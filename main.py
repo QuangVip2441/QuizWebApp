@@ -59,6 +59,25 @@ def indexUser():
 
     return render_template('user.html', data=data)
 
+
+#Thêm câu hỏi trắc nghiệm=========================================================================
+@app.route('/insertquestions/<moduleid>', methods=['GET'])
+def insert_questions(moduleid):
+    if request.method == 'GET':
+        module_ref = db.collection("module").document(moduleid)
+        module_data = module_ref.get().to_dict()
+
+        
+        if module_data:
+            module_data['id'] = moduleid
+            return render_template("insertquestions.html", module = module_data)
+        else:
+            return render_template('notify.html', message='Module không tồn tại')
+        
+# Xử lý thêm câu hỏi======================================================
+@app.route('/insertquestions/<moduleid>', methods=['POST'])
+def insert_questions_process(moduleid):
+    pass
 # gọi trang thêm người dùng============================================================================================
 @app.route('/register')
 def register(): 
@@ -133,7 +152,6 @@ def login():
 def logout():
     return render_template('login.html')
 
-
 # gọi trang chủ============================================================================================
 @app.route('/home')
 def Home():
@@ -173,28 +191,6 @@ def user_edit_process(id):
         db.collection('user').document(id).set(user_data)
         return indexUser()
 
-# xử lý sửa module=====================================================================================
-@app.route('/module/<id>', methods=['POST'])
-def module_edit_process(id):
-        name = request.form["name"]
-        introduction = request.form["introduction"]
-        numberQuestions = request.form["numberQuestions"]
-        
-
-        # Validate form data
-        if not name or not introduction or not numberQuestions:
-           return render_template('notify.html', message='Nội dung chưa đủ')
-
-        # Update user data in Firestore
-
-        module_data = {
-            'name': name,
-            'introduction': introduction,
-            'numberQuestions': numberQuestions
-        }
-
-        db.collection('module').document(id).set(module_data)
-        return indexModule()
 # Hàm xử lý xóa ============================================
 @app.route('/delete/<id>', methods=['GET'])
 def delete_user(id):
@@ -233,7 +229,28 @@ def user_edit(id):
             return render_template("editUser.html", user = user_data)
         else:
             return render_template('notify.html', message='Tài khoản không tồn tại')
-   
+# xử lý sửa module=====================================================================================
+@app.route('/module/<id>', methods=['POST'])
+def module_edit_process(id):
+        name = request.form["name"]
+        introduction = request.form["introduction"]
+        numberQuestions = request.form["numberQuestions"]
+        
+
+        # Validate form data
+        if not name or not introduction or not numberQuestions:
+           return render_template('notify.html', message='Nội dung chưa đủ')
+
+        # Update user data in Firestore
+
+        module_data = {
+            'name': name,
+            'introduction': introduction,
+            'numberQuestions': numberQuestions
+        }
+
+        db.collection('module').document(id).set(module_data)
+        return indexModule()
 # Gọi trang sửa Module và xử lý Module==================================================================
 @app.route('/module/<id>' , methods=['GET'])
 def module_edit(id):
@@ -271,7 +288,7 @@ def module_edit(id):
 
     return redirect(url_for("user", username=email))
 # Gọi trang danh sách các câu hỏi=================================================================
-@app.route('/questions/<id>' , methods=['GET'])
+@app.route('/questions/<id>', methods=['GET'])
 def list_question(id):
     if request.method == 'GET':
 
@@ -286,7 +303,7 @@ def list_question(id):
             doc_data['id'] = doc.id  # Add the document ID to the data dictionary
             data.append({'row_number': i, **doc_data})
 
-        return render_template('listquestions.html', data=data)
+        return render_template('listquestions.html', data=data, module_id=id)
 
 # HÀM NÀY XỬ LÝ BẮT BUỘC PHẢI LOGIN ,NẾU KHÔNG SẼ KHÔNG VÀO ĐƯỢC HỆ THỐNG
 # def login_required(f):

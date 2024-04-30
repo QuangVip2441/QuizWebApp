@@ -36,9 +36,8 @@
             <div class="col-lg-12 ">
                 <h2 class="text-center">Danh sách Các Câu Hỏi</h2>
                 <div class="row">
-                    <a href="" class="btn btn-success" style="margin-left: 40px;"><b>Thêm Câu Hỏi</b></a>
+                    <a href="{{ url_for('insert_questions', moduleid = module_id) }}" class="btn btn-success" style="margin-left: 40px;"><b>Thêm Câu Hỏi</b></a>                </div>
                 </div>
-                
             </div>
             <table class="table table-striped" id="dataTable" style="margin: 20px;">
                 <thead>
@@ -66,9 +65,9 @@
                             <td>{{ ans.answer }}</td>
                         {% endfor %}
                         <td>
-                            <a href="" class="btn btn-warning btn-sm">Edit</a>
-                            <a href="" class="btn btn-danger btn-sm">Delete</a>
-                        </td>
+                            <a href="" class="btn btn-warning btn-sm" style="width: 70px; margin-bottom: 5px;">Update</a>
+                            <a href="" class="btn btn-danger btn-sm" style="width: 70px;">Delete</a>
+                          </td>
                     </tr>
                 {% endfor %}
                 </tbody>
