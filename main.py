@@ -67,17 +67,40 @@ def insert_questions(moduleid):
         module_ref = db.collection("module").document(moduleid)
         module_data = module_ref.get().to_dict()
 
-        
         if module_data:
             module_data['id'] = moduleid
-            return render_template("insertquestions.html", module = module_data)
+            return render_template("insertquestions.html", module=module_data, module_id=moduleid)
         else:
             return render_template('notify.html', message='Module không tồn tại')
+
         
 # Xử lý thêm câu hỏi======================================================
 @app.route('/insertquestions/<moduleid>', methods=['POST'])
 def insert_questions_process(moduleid):
-    pass
+    content = request.form['content']
+    answerA = request.form['answerA']
+    answerB = request.form['answerB']
+    answerC = request.form['answerC']
+    answerD = request.form['answerD']
+    correct = request.form['correct']
+
+    if request.method == 'POST':
+        question_data = {
+            'content' : content,
+            'correct' : correct,
+            'choices' : [
+                {'id' : 'A', 'answer' : answerA},
+                {'id' : 'B', 'answer' : answerB},
+                {'id' : 'C', 'answer' : answerC},
+                {'id' : 'D', 'answer' : answerD}
+            ]
+        }
+
+        module_ref = db.collection("module").document(moduleid).collection('questions').document() # Tạo một document mới trong collection 'questions'
+        module_ref.set(question_data)
+        return redirect(url_for('list_question', id=moduleid))
+
+
 # gọi trang thêm người dùng============================================================================================
 @app.route('/register')
 def register(): 
@@ -199,7 +222,7 @@ def delete_user(id):
             if (confirm("Are you sure you want to delete user {0}?")) {{
                 window.location.href = "/delete_confirm/{0}";
             }} else {{
-                window.location.href = "/";
+                window.location.href = "/user";
             }}
         </script>
     '''.format(id)

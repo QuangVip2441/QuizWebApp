@@ -37,13 +37,14 @@
         }
 
         input {
-            width: 100%;
+            width: calc(100% - 20px); /* Thêm margin vào chiều rộng của input */
             padding: 10px;
             margin-bottom: 20px;
             box-sizing: border-box;
             border: 2px solid #ccc;
             border-radius: 6px;
             font-size: 16px;
+            margin-right: 10px; /* Margin giữa input và radio button */
         }
 
         button {
@@ -74,54 +75,47 @@
             text-decoration: none;
             font-weight: bold;
         }
+
+        /* Style cho các radio button */
+        .radio-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px; /* Thêm margin dưới cùng cho radio button */
+        }
+
+        .radio-group label {
+            margin-right: 10px;
+            display: flex; /* Sử dụng flexbox */
+            align-items: center; /* Căn chỉnh label và radio button theo chiều dọc */
+        }
     </style>
-    {% include "head.html" %}
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
-
-    <style>
-    .wider-container {
-        max-width: 1400px; /* Adjust the max-width to your preference */
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .table-bordered {
-        border: 1px solid #e00000; /* Add a 1px solid border around the table */
-        border-collapse: collapse;
-    }
-
-    .form-bordered {
-        border: 1px solid #ddd; /* Add a 1px solid border around the form */
-        padding: 20px; /* Add some padding to the form */
-        border-radius: 8px; /* Optional: Add rounded corners */
-    }
-</style>
 </head>
 <body>
-    <form method="post" action="/registered">
+    <form method="post" action="/insertquestions/{{ module_id }}">
         <B> <h2>Thêm câu hỏi trắc nghiệm</h2></B>
         <label for="content">Nội dung câu hỏi:</label>
         <input type="text" id="content" name="content" required>
         <br>
         <label for="answerA">Đáp án A:</label>
         <input type="text" id="answerA" name="answerA" required>
-        <input type="radio" id="correctA" name="correctA" value="A">
         <br>
         <label for="answerB">Đáp án B:</label>
         <input type="text" id="answerB" name="answerB" required>
-        <input type="radio" id="correctB" name="correctB" value="B">
         <br>
         <label for="answerC">Đáp án C:</label>
         <input type="text" id="answerC" name="answerC" required>
-        <input type="radio" id="correctC" name="correctC" value="C">
         <br>
         <label for="answerD">Đáp án D:</label>
         <input type="text" id="answerD" name="answerD" required>
-        <input type="radio" id="correctD" name="correctD" value="D">
         <br>
+        <label>Đáp án đúng</label>
+        <div class="radio-group">
+            <label for="A"><input type="radio" id="A" name="correct" value="A">A</label>
+            <label for="B"><input type="radio" id="B" name="correct" value="B">B</label>
+            <label for="C"><input type="radio" id="C" name="correct" value="C">C</label>
+            <label for="D"><input type="radio" id="D" name="correct" value="D">D</label>
+        </div>
         <button type="submit">Thêm</button>
-      </form>
+    </form>
 </body>
 </html>
