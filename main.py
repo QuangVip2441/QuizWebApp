@@ -1,4 +1,5 @@
 from flask import Flask, render_template, url_for,  request, redirect, session
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
 import pyrebase
 import firebase_admin 
 from firebase_admin import credentials, firestore, auth
@@ -9,6 +10,37 @@ from functools import wraps
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Qh2410.2'
+login_manager = LoginManager(app)
+
+# User class for Flask-Login
+class User(UserMixin):
+    def __init__(self, id):
+        self.id = id
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User(user_id)
+
+# Hàm kiểm tra đăng nhập
+def is_logged_in():
+    return 'user_id' in session
+
+# Hàm đăng nhập
+def login_user(user_id):
+    session['user_id'] = user_id
+
+# Hàm đăng xuất
+def logout_user():
+    session.pop('user_id', None)
+
+# Đánh dấu một route là cần phải đăng nhập
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not is_logged_in():
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 firebaseConfig = {
         'apiKey': "AIzaSyCH5xDaEk35SaFAZn7GO7x0tX2OE4DNySA",
@@ -32,6 +64,7 @@ db = firestore.client()
 
 #Trang danh sách module =================================================================================
 @app.route('/module')
+@login_required
 def indexModule():
     collection_name = 'module'
     docs = db.collection(collection_name).stream()
@@ -47,6 +80,7 @@ def indexModule():
 
 # Tạo số thứ tự trang user============================================================================================
 @app.route('/user')
+@login_required
 def indexUser():
     collection_name = 'user'
     docs = db.collection(collection_name).stream()  # Add parentheses to call the stream() method
@@ -62,6 +96,7 @@ def indexUser():
 
 #Thêm câu hỏi trắc nghiệm=========================================================================
 @app.route('/insertquestions/<moduleid>', methods=['GET'])
+@login_required
 def insert_questions(moduleid):
     if request.method == 'GET':
         module_ref = db.collection("module").document(moduleid)
@@ -72,10 +107,10 @@ def insert_questions(moduleid):
             return render_template("insertquestions.html", module=module_data, module_id=moduleid)
         else:
             return render_template('notify.html', message='Module không tồn tại')
-
-        
+       
 # Xử lý thêm câu hỏi======================================================
 @app.route('/insertquestions/<moduleid>', methods=['POST'])
+@login_required
 def insert_questions_process(moduleid):
     content = request.form['content']
     answerA = request.form['answerA']
@@ -100,7 +135,6 @@ def insert_questions_process(moduleid):
         module_ref.set(question_data)
         return redirect(url_for('list_question', id=moduleid))
 
-
 # gọi trang thêm người dùng============================================================================================
 @app.route('/register')
 def register(): 
@@ -108,6 +142,7 @@ def register():
 
 #xử lý thêm người dùng============================================================================================
 @app.route('/registered', methods=['POST'])
+@login_required
 def insertUser():
     username = request.form['username']
     email = request.form['email']
@@ -154,34 +189,33 @@ def CheckexistsEmailandMSSV(email,mssv):
     return True
 
 # xử lý login============================================================================================
-@app.route('/', methods = ['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
 
         try:
-            login = auth.sign_in_with_email_and_password(email,password)
+            login = auth.sign_in_with_email_and_password(email, password)
             session['logged_in'] = True
-            session['email'] = email                
-            # return redirect(url_for('index'))
-            return render_template('index.html')
+            session['email'] = email
+            login_user(login['localId'])  # Đăng nhập bằng localId
+            return redirect(url_for('indexModule'))
         except:
-           return render_template('notify.html', message='Sai thông tin đăng nhập')
+            return render_template('notify.html', message='Sai thông tin đăng nhập')
     return render_template('login.html')
        
 #Xử lý logout============================================================================================
 @app.route('/logout')
+@login_required
 def logout():
-    return render_template('login.html')
-
-# gọi trang chủ============================================================================================
-@app.route('/home')
-def Home():
-    return "Home page"
+    logout_user()  # Đăng xuất
+    session.clear()  # Xóa phiên đăng nhập
+    return redirect(url_for('login'))
 
 # xử lý sửa user=====================================================================================
 @app.route('/user/<id>', methods=['POST'])
+@login_required
 def user_edit_process(id):
         username = request.form["username"]
         email = request.form["email"]
@@ -216,6 +250,7 @@ def user_edit_process(id):
 
 # Hàm xử lý xóa ============================================
 @app.route('/delete/<id>', methods=['GET'])
+@login_required
 def delete_user(id):
     return '''
         <script>
@@ -228,6 +263,7 @@ def delete_user(id):
     '''.format(id)
 
 @app.route('/delete_confirm/<id>', methods=['GET'])
+@login_required
 def delete_user_confirm(id):
     try:
         firebase_admin.auth.delete_user(id)
@@ -237,6 +273,7 @@ def delete_user_confirm(id):
         return 'Error deleting user: {}'.format(e)
 # gọi trang sửa người dùng và xử lý sửa người dùng============================================================================================
 @app.route('/user/<id>' , methods=['GET'])
+@login_required
 def user_edit(id):
     if request.method == 'GET':
         user = firebase_admin.auth.get_user(id)
@@ -254,6 +291,7 @@ def user_edit(id):
             return render_template('notify.html', message='Tài khoản không tồn tại')
 # xử lý sửa module=====================================================================================
 @app.route('/module/<id>', methods=['POST'])
+@login_required
 def module_edit_process(id):
         name = request.form["name"]
         introduction = request.form["introduction"]
@@ -276,6 +314,7 @@ def module_edit_process(id):
         return indexModule()
 # Gọi trang sửa Module và xử lý Module==================================================================
 @app.route('/module/<id>' , methods=['GET'])
+@login_required
 def module_edit(id):
     if request.method == 'GET':
 
@@ -312,6 +351,7 @@ def module_edit(id):
     return redirect(url_for("user", username=email))
 # Gọi trang danh sách các câu hỏi=================================================================
 @app.route('/questions/<id>', methods=['GET'])
+@login_required
 def list_question(id):
     if request.method == 'GET':
 
@@ -327,26 +367,72 @@ def list_question(id):
             data.append({'row_number': i, **doc_data})
 
         return render_template('listquestions.html', data=data, module_id=id)
+# gọi trang sửa questions =============================================================
+@app.route('/editquestion/<module_id>/<idquestion>', methods=['GET'])
+@login_required
+def question_edit(module_id, idquestion):
+    # Lấy dữ liệu câu hỏi từ Firestore
+    question_ref = db.collection("module").document(module_id).collection('questions').document(idquestion)
+    question_data = question_ref.get().to_dict()
 
-# HÀM NÀY XỬ LÝ BẮT BUỘC PHẢI LOGIN ,NẾU KHÔNG SẼ KHÔNG VÀO ĐƯỢC HỆ THỐNG
-# def login_required(f):
-#     @wraps(f)
-#     def decorated_function(*args, **kwargs):
-#         if 'user_id' not in session:
-#             Flask('Login required.')
-#             return redirect(url_for('login'))
-#         return f(*args, **kwargs)
-#     return decorated_function
+    if question_data:
+        question_data['id'] = idquestion
+        return render_template("editQuestions.html", questions=question_data, module_id=module_id)
+    else:
+        return render_template('notify.html', message='Câu hỏi không tồn tại')
 
-# Secure Page Route (Example)
-# @app.route('/secure_page')
-# def secure_page():
-#     if 'user_id' in session:
-#         # This route is accessible only for logged-in users
-#         return render_template('navbar.html')
-#     else:
-#         flash('Login required.')
-#         return redirect(url_for('login'))
+# Xử lý sửa questions ======================================================================
+@app.route('/editquestion/<module_id>/<idquestion>', methods=['POST'])
+@login_required
+def question_edit_process(module_id, idquestion):
+    # Lấy dữ liệu từ form
+    content = request.form['content']
+    answerA = request.form['answerA']
+    answerB = request.form['answerB']
+    answerC = request.form['answerC']
+    answerD = request.form['answerD']
+    correct = request.form['correct']
+
+    # Tạo dữ liệu mới cho câu hỏi
+    question_data = {
+        'content': content,
+        'correct': correct,
+        'choices': [
+            {'id': 'A', 'answer': answerA},
+            {'id': 'B', 'answer': answerB},
+            {'id': 'C', 'answer': answerC},
+            {'id': 'D', 'answer': answerD}
+        ]
+    }
+
+    # Cập nhật dữ liệu vào Firestore
+    module_ref = db.collection("module").document(module_id).collection('questions').document(idquestion)
+    module_ref.set(question_data, merge=True)
+
+    # Chuyển hướng về trang danh sách câu hỏi
+    return redirect(url_for('list_question', id=module_id))
+# Xóa câu hỏi==========================================================================================
+@app.route('/deletequestion_confirm/<module_id>/<idquestion>', methods=['GET'])
+@login_required
+def delete_question_confirm(module_id, idquestion):
+    try:
+        db.collection("module").document(module_id).collection('questions').document(idquestion).delete()
+        return redirect(url_for('list_question', id=module_id))
+    except Exception as e:
+        return 'Error deleting question: {}'.format(e)
+
+@app.route('/deletequestion/<module_id>/<idquestion>', methods=['GET'])
+@login_required
+def delete_question(module_id, idquestion):
+    return '''
+        <script>
+            if (confirm("Bạn chắc chắn muốn xóa câu hỏi này?")) {{
+                window.location.href = "/deletequestion_confirm/{0}/{1}";
+            }} else {{
+                window.location.href = "/questions/{0}";
+            }}
+        </script>
+    '''.format(module_id, idquestion) 
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm câu hỏi trắc nghiệm</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 50px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 350px;
+            position: relative;
+            border: 2px solid #2196F3; /* Màu sắc khung cho form */
+        }
+
+        label {
+            display: block;
+            margin-bottom: 12px;
+            color: #555;
+        }
+
+        input {
+            width: calc(100% - 20px); /* Thêm margin vào chiều rộng của input */
+            padding: 10px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            margin-right: 10px; /* Margin giữa input và radio button */
+        }
+
+        button {
+            background-color: #2196F3;
+            color: #fff;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        button:hover {
+            background-color: #0b7dda;
+        }
+
+        /* Thêm một lớp cho nút đăng nhập */
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .login-link a {
+            color: #2196F3;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* Style cho các radio button */
+        .radio-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px; /* Thêm margin dưới cùng cho radio button */
+        }
+
+        .radio-group label {
+            margin-right: 10px;
+            display: flex; /* Sử dụng flexbox */
+            align-items: center; /* Căn chỉnh label và radio button theo chiều dọc */
+        }
+    </style>
+</head>
+<body>
+    <form method="post" action="{{ url_for('question_edit_process', module_id=module_id, idquestion=questions.id) }}">
+        <B> <h2>Chỉnh sửa câu hỏi trắc nghiệm</h2></B>
+        <label for="content">Nội dung câu hỏi:</label>
+        <input type="text" id="content" name="content" value="{{ questions.content }}" required>
+        <br>
+        <label for="answerA">Đáp án A:</label>
+        <input type="text" id="answerA" name="answerA" value="{{ questions.choices[0].answer }}" required>
+        <br>
+        <label for="answerB">Đáp án B:</label>
+        <input type="text" id="answerB" name="answerB" value="{{ questions.choices[1].answer }}" required>
+        <br>
+        <label for="answerC">Đáp án C:</label>
+        <input type="text" id="answerC" name="answerC" value="{{ questions.choices[2].answer }}" required>
+        <br>
+        <label for="answerD">Đáp án D:</label>
+        <input type="text" id="answerD" name="answerD" value="{{ questions.choices[3].answer }}" required>
+        <br>
+        <label>Đáp án đúng</label>
+        <div class="radio-group">
+            <label for="A"><input type="radio" id="A" name="correct" value="A" {% if questions.correct == 'A' %} checked {% endif %}>A</label>
+            <label for="B"><input type="radio" id="B" name="correct" value="B" {% if questions.correct == 'B' %} checked {% endif %}>B</label>
+            <label for="C"><input type="radio" id="C" name="correct" value="C" {% if questions.correct == 'C' %} checked {% endif %}>C</label>
+            <label for="D"><input type="radio" id="D" name="correct" value="D" {% if questions.correct == 'D' %} checked {% endif %}>D</label>
+        </div>        
+        <button type="submit">Cập nhật</button>
+    </form>    
+</body>
+</html>
