@@ -131,8 +131,17 @@ def insert_questions_process(moduleid):
             ]
         }
 
-        module_ref = db.collection("module").document(moduleid).collection('questions').document() # Tạo một document mới trong collection 'questions'
-        module_ref.set(question_data)
+        question_ref = db.collection("module").document(moduleid).collection('questions').document() # Tạo một document mới trong collection 'questions'
+        question_ref.set(question_data)
+
+        module_ref = db.collection("module").document(moduleid)
+        current_number_questions = module_ref.get().get('numberQuestions') or 0
+
+        new_number_questions = int(current_number_questions) + 1
+        new_number_questions_str = str(new_number_questions)
+        module_ref.update({'numberQuestions': new_number_questions_str})
+
+
         return redirect(url_for('list_question', id=moduleid))
 
 # gọi trang thêm người dùng============================================================================================
@@ -417,6 +426,13 @@ def question_edit_process(module_id, idquestion):
 def delete_question_confirm(module_id, idquestion):
     try:
         db.collection("module").document(module_id).collection('questions').document(idquestion).delete()
+        module_ref = db.collection("module").document(module_id)
+        current_number_questions = module_ref.get().get('numberQuestions') or 0
+
+        new_number_questions = int(current_number_questions) - 1
+        new_number_questions_str = str(new_number_questions)
+        module_ref.update({'numberQuestions': new_number_questions_str})
+
         return redirect(url_for('list_question', id=module_id))
     except Exception as e:
         return 'Error deleting question: {}'.format(e)
