@@ -1,5 +1,6 @@
 from flask import Flask, render_template, url_for,  request, redirect, session
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
+from uuid import uuid4
 import pyrebase
 import firebase_admin 
 from firebase_admin import credentials, firestore, auth
@@ -121,6 +122,7 @@ def insert_questions_process(moduleid):
 
     if request.method == 'POST':
         question_data = {
+            'id'      : str(uuid4()),  # Generate a random UUID
             'content' : content,
             'correct' : correct,
             'choices' : [
@@ -131,7 +133,7 @@ def insert_questions_process(moduleid):
             ]
         }
 
-        question_ref = db.collection("module").document(moduleid).collection('questions').document() # Tạo một document mới trong collection 'questions'
+        question_ref = db.collection("module").document(moduleid).collection('questions').document(question_data['id']) # Tạo một document mới trong collection 'questions'
         question_ref.set(question_data)
 
         module_ref = db.collection("module").document(moduleid)
@@ -140,7 +142,6 @@ def insert_questions_process(moduleid):
         new_number_questions = int(current_number_questions) + 1
         new_number_questions_str = str(new_number_questions)
         module_ref.update({'numberQuestions': new_number_questions_str})
-
 
         return redirect(url_for('list_question', id=moduleid))
 
