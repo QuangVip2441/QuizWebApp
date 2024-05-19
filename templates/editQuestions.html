@@ -92,7 +92,7 @@
 </head>
 <body>
     <form method="post" action="{{ url_for('question_edit_process', module_id=module_id, idquestion=questions.id) }}">
-        <B> <h2>Chỉnh sửa câu hỏi trắc nghiệm</h2></B>
+        <B> <h2>Sửa câu hỏi trắc nghiệm</h2></B>
         <label for="content">Nội dung câu hỏi:</label>
         <input type="text" id="content" name="content" value="{{ questions.content }}" required>
         <br>
@@ -110,10 +110,10 @@
         <br>
         <label>Đáp án đúng</label>
         <div class="radio-group">
-            <label for="A"><input type="radio" id="A" name="correct" value="A" {% if questions.correct == 'A' %} checked {% endif %}>A</label>
-            <label for="B"><input type="radio" id="B" name="correct" value="B" {% if questions.correct == 'B' %} checked {% endif %}>B</label>
-            <label for="C"><input type="radio" id="C" name="correct" value="C" {% if questions.correct == 'C' %} checked {% endif %}>C</label>
-            <label for="D"><input type="radio" id="D" name="correct" value="D" {% if questions.correct == 'D' %} checked {% endif %}>D</label>
+            <label for="A"><input type="radio" id="A" name="correct" value="A" {% if questions.correct == 'A' %} checked {% endif %}required>A</label>
+            <label for="B"><input type="radio" id="B" name="correct" value="B" {% if questions.correct == 'B' %} checked {% endif %}required>B</label>
+            <label for="C"><input type="radio" id="C" name="correct" value="C" {% if questions.correct == 'C' %} checked {% endif %}required>C</label>
+            <label for="D"><input type="radio" id="D" name="correct" value="D" {% if questions.correct == 'D' %} checked {% endif %}required>D</label>
         </div>        
         <button type="submit">Cập nhật</button>
     </form>    

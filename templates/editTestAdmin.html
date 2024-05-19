@@ -100,25 +100,25 @@
 </style>
 </head>
 <body>
-    <form method="post" action="/registered">
-       <B> <h2>Thêm tài khoản người dùng</h2></B>
-        <label for="username">Tên người dùng:</label>
-        <input type="text" id="username" name="username" required>
+    <form method="post" action="{{ url_for('testadmin_editprocess', moduleid=module.moduleid) }}">
+        <h2><b>Sửa thông tin phần thi</b></h2>
+        <label for="test_name">Tên phần thi:</label>
+        <input type="text" id="test_name" name="test_name" value="{{ module.test_name }}" required>
         <br>
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
+        <label for="numberquestion">Số lượng câu hỏi:</label>
+        <input type="number" id="numberquestion" name="numberquestion" value="{{ module.numberquestion }}" required>
         <br>
-        <label for="password">Mật khẩu:</label>
-        <input type="password" id="password" name="password" required>
+        <label for="test_get_numberQuestions">Số lượng câu hỏi được lấy cho bài thi tổng:</label>
+        {% if module.moduleid == 'yPcUWum0mjuL7mld9Yhy' or module.moduleid == 'ZayqBjRnPr1GXBoyPdOh'%}
+        <input type="number" id="test_get_numberQuestions" name="test_get_numberQuestions" value="{{ test_get_numberQuestions_calculated }}" readonly>
+        {% else %}
+        <input type="number" id="test_get_numberQuestions" name="test_get_numberQuestions" value="{{ module.test_get_numberQuestions }}" max="10" required>
+        {% endif %}
         <br>
-        <label for="username">Mã số sinh  viên</label>
-        <input type="text" id="mssv" name="mssv" required>
+        <label for="timeAllowed">Thời gian làm bài (Tính bằng phút):</label>
+        <input type="number" id="timeAllowed" name="timeAllowed" value="{{ module.timeAllowed }}" required>
         <br>
-        <label for="username">Số điện thoại:</label>
-        <input type="number" id="phone" name="phone" required>
-        <br>
-        <button type="submit">Thêm</button>
-
+        <button type="submit">Sửa thông tin</button>
     </form>
 </body>
 </html>

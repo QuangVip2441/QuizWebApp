@@ -17,7 +17,7 @@ login_manager = LoginManager(app)
 class User(UserMixin):
     def __init__(self, id):
         self.id = id
-
+    
 @login_manager.user_loader
 def load_user(user_id):
     return User(user_id)
@@ -199,21 +199,28 @@ def CheckexistsEmailandMSSV(email,mssv):
     return True
 
 # xử lý login============================================================================================
+# xử lý login============================================================================================
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
 
-        try:
-            login = auth.sign_in_with_email_and_password(email, password)
-            session['logged_in'] = True
-            session['email'] = email
-            login_user(login['localId'])  # Đăng nhập bằng localId
-            return redirect(url_for('indexModule'))
-        except:
-            return render_template('notify.html', message='Sai thông tin đăng nhập')
+        # Kiểm tra xem email và mật khẩu có phù hợp với tài khoản admin hay không
+        if email == 'Admin1234@gmail.com' and password == 'Admin1234':
+            try:
+                login = auth.sign_in_with_email_and_password(email, password)
+                session['logged_in'] = True
+                session['email'] = email
+                login_user(login['localId'])  # Đăng nhập bằng localId
+                return redirect(url_for('indexModule'))
+            except:
+                return render_template('notify.html', message='Sai thông tin đăng nhập')
+        else:
+            return render_template('notify.html', message='Tài khoản hoặc mật khẩu không đúng')
+
     return render_template('login.html')
+
        
 #Xử lý logout============================================================================================
 @app.route('/logout')
@@ -450,6 +457,89 @@ def delete_question(module_id, idquestion):
             }}
         </script>
     '''.format(module_id, idquestion) 
+# xử lý danh sách quản lí bài kiểm tra===================================================================
+@app.route('/testadmin')
+@login_required
+def indexTestAdmin():
+    collection_name = 'testadmin'
+    docs = db.collection(collection_name).stream()
+
+    data = []
+    for i, doc in enumerate(docs, start=1):
+        doc_data = doc.to_dict()
+        doc_data['moduleid'] = doc.id  # Add the document ID to the data dictionary
+        data.append({'row_number': i, **doc_data})
+
+    return render_template('testAdmin.html', data=data)
+# Sửa danh sách quản lí bài kiểm tra==============================================================
+@app.route('/testadmin/<moduleid>', methods=['GET'])
+@login_required
+def testadmin_edit(moduleid):
+    if request.method == 'GET':
+        try:
+            module_ref = db.collection("testadmin").document(moduleid)
+            module_data = module_ref.get().to_dict()
+            
+            if module_data:
+                module_data['moduleid'] = moduleid
+
+                # Nếu moduleid là yPcUWum0mjuL7mld9Yhy thì tính toán test_get_numberQuestions
+                if moduleid == 'yPcUWum0mjuL7mld9Yhy':
+                    all_modules = db.collection('testadmin').stream()
+                    total_questions = 0
+                    for module in all_modules:
+                        if module.id != moduleid:
+                            # Convert to int if possible, otherwise use 0
+                            total_questions += int(module.to_dict().get('test_get_numberQuestions', 0))
+                    test_get_numberQuestions_calculated = 50 - total_questions
+                    return render_template("editTestAdmin.html", module=module_data, test_get_numberQuestions_calculated=test_get_numberQuestions_calculated)
+                elif moduleid == 'ZayqBjRnPr1GXBoyPdOh':  # Nếu moduleid là ZayqBjRnPr1GXBoyPdOh, gán giá trị 0 cho test_get_numberQuestions
+                    module_data['test_get_numberQuestions'] = 0
+                    return render_template("editTestAdmin.html", module=module_data, test_get_numberQuestions_calculated = 0)
+                else:
+                    return render_template("editTestAdmin.html", module=module_data)
+            else:
+                return render_template('notify.html', message='Phần thi không tồn tại')
+        except Exception as e:
+            print(f"Error in testadmin_edit GET: {e}")
+            return render_template('notify.html', message='Đã xảy ra lỗi khi truy xuất dữ liệu')
+
+
+@app.route('/testadmin/<moduleid>', methods=['POST'])
+@login_required
+def testadmin_editprocess(moduleid):
+    test_name = request.form["test_name"]
+    numberquestion = request.form["numberquestion"]
+    timeAllowed = request.form["timeAllowed"]
+
+    # Validate form data
+    if not test_name or not numberquestion or not timeAllowed:
+       return render_template('notify.html', message='Nội dung chưa đủ')
+
+    # Khi moduleid là yPcUWum0mjuL7mld9Yhy thì tính test_get_numberQuestions
+    if moduleid == 'yPcUWum0mjuL7mld9Yhy':
+        all_modules = db.collection('testadmin').stream()
+        total_questions = 0
+        for module in all_modules:
+            if module.id != moduleid:
+                # Convert to int if possible, otherwise use 0
+                total_questions += int(module.to_dict().get('test_get_numberQuestions', 0))
+        test_get_numberQuestions = 50 - total_questions
+    else:
+        test_get_numberQuestions = int(request.form["test_get_numberQuestions"])  # Ensure this is an int
+
+    # Update user data in Firestore
+    module_data = {
+        'test_name': test_name,
+        'numberquestion': int(numberquestion),  # Ensure this is an int
+        'test_get_numberQuestions': test_get_numberQuestions,  # Already an int
+        'timeAllowed': int(timeAllowed)  # Ensure this is an int
+    }
+
+    db.collection('testadmin').document(moduleid).set(module_data)
+    return indexTestAdmin()
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
