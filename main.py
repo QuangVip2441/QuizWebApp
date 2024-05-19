@@ -197,8 +197,28 @@ def CheckexistsEmailandMSSV(email,mssv):
     elif len(list(mssv_docs)) > 0:
         return False
     return True
+# Kiểm tra sự tồn tại của email và mssv người dùng khác============================================
+def check_exists_email_and_mssv(id, email, mssv):
+    # Check if the email is already registered
+    email_query = db.collection('user').where('email', '==', email)
+    email_docs = email_query.stream()
+    
+    for doc in email_docs:
+        # If email exists and it does not belong to the current user
+        if doc.id != id:
+            return False
 
-# xử lý login============================================================================================
+    # Check if MSSV is already registered
+    mssv_query = db.collection('user').where('mssv', '==', mssv)
+    mssv_docs = mssv_query.stream()
+    
+    for doc in mssv_docs:
+        # If MSSV exists and it does not belong to the current user
+        if doc.id != id:
+            return False
+
+    return True
+
 # xử lý login============================================================================================
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -243,6 +263,9 @@ def user_edit_process(id):
         # Validate form data
         if not username or not email or not password or not mssv or not phone:
            return render_template('notify.html', message='Nội dung chưa đủ')
+        elif check_exists_email_and_mssv(id, email, mssv)!= True:
+            return render_template('notify.html', message='Email hoặc mã số sinh viên đã tồn tại')
+    
 
         # Update user data in Firestore
         try:
