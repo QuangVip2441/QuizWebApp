@@ -10,26 +10,67 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
 
     <style>
-    .wider-container {
-        max-width: 1400px; /* Adjust the max-width to your preference */
-        margin-left: auto;
-        margin-right: auto;
-    }
+        .search-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f4f4f4;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
 
-    .table-bordered {
-        border: 1px solid #e00000; /* Add a 1px solid border around the table */
-        border-collapse: collapse;
-    }
+.search-form label {
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: block;
+}
 
-    .form-bordered {
-        border: 1px solid #ddd; /* Add a 1px solid border around the form */
-        padding: 20px; /* Add some padding to the form */
-        border-radius: 8px; /* Optional: Add rounded corners */
-    }
-</style>
+.search-form input[type="text"] {
+    width: 80%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.search-form button[type="submit"] {
+    width: 80%;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.search-form button[type="submit"]:hover {
+    background-color: #0062cc;
+}
+        .wider-container {
+            max-width: 1400px; /* Adjust the max-width to your preference */
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .table-bordered {
+            border: 1px solid #e00000; /* Add a 1px solid border around the table */
+            border-collapse: collapse;
+        }
+
+        .form-bordered {
+            border: 1px solid #ddd; /* Add a 1px solid border around the form */
+            padding: 20px; /* Add some padding to the form */
+            border-radius: 8px; /* Optional: Add rounded corners */
+        }
+        .search-button {
+    padding: 5px 10px;
+    font-size: 14px;
+}
+    </style>
 </head>
 <body>
-    {% include "navbar.html" %}
+{% include "navbar.html" %}
 <section class="py-1">
     <div class="container mt-5 wider-container">
         <div class="row">
@@ -38,6 +79,13 @@
                 <div class="row">
                     <a href="/register" class="btn btn-success" style="margin-left: 40px;"><b>Thêm Người dùng</b></a>
                 </div>
+            </div>
+            <div class="col-md-12 search-form" style="margin-left: 40px;">
+                <form action="/search" method="POST" >
+                    <label for="searchInput">Tìm kiếm theo Mã số sinh viên:</label>
+                    <input style="width: 600px;" type="text" id="searchInput" name="mssv" class="form-control search-input" placeholder="Nhập mã số sinh viên...">
+                    <button style="width: 200px; text-align: center;" type="submit" class="btn btn-primary mt-2 search-button ml-auto">Tìm kiếm</button>
+                </form>
             </div>
             <table class="table table-striped" id="dataTable" style="margin: 20px;">
                 <thead>
@@ -68,9 +116,6 @@
             </table>
         </div>
     </div>
-
 </section>
-    
-   
 </body>
 </html>

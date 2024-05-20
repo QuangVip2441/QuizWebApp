@@ -561,8 +561,42 @@ def testadmin_editprocess(moduleid):
 
     db.collection('testadmin').document(moduleid).set(module_data)
     return indexTestAdmin()
+# Tìm kiếm sinh viên theo mã số sinh viên================================================
+@app.route('/search', methods=['POST'])
+@login_required
+def search_student():
+    mssv = request.form['mssv']
+    collection_name = 'user'
+    docs = db.collection(collection_name).where('mssv', '==', mssv).stream()
 
+    data = []
+    for doc in docs:
+        doc_data = doc.to_dict()
+        doc_data['id'] = doc.id
+        data.append(doc_data)
 
+    if len(data) == 0:
+        return render_template('notify.html', message='Không tìm thấy sinh viên với mã số sinh viên này')
+    else:
+        return render_template('user.html', data=data)
+# Tìm kiếm câu hỏi thuộc từng mô đun ==================================================================
+@app.route('/search', methods=['POST'])
+@login_required
+def search():
+    content = request.form['content']
+    collection_name = 'questions'
+    docs = db.collection(collection_name).where('content', '==', content).stream()
+
+    data = []
+    for doc in docs:
+        doc_data = doc.to_dict()
+        doc_data['id'] = doc.id
+        data.append(doc_data)
+
+    if len(data) == 0:
+        return render_template('notify.html', message='Không tìm thấy câu hỏi với nội dung này')
+    else:
+        return render_template('questions.html', data=data, module_id=module_id)
 
 if __name__ == '__main__':
     app.run(debug=True)
