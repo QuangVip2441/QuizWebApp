@@ -406,7 +406,7 @@ def list_question(id):
             doc_data['id'] = doc.id  # Add the document ID to the data dictionary
             data.append({'row_number': i, **doc_data})
 
-        return render_template('listquestions.html', data=data, module_id=id)
+        return render_template('listquestions.html', data=data, module_id=id, search_query='')
 # gọi trang sửa questions =============================================================
 @app.route('/editquestion/<module_id>/<idquestion>', methods=['GET'])
 @login_required
@@ -580,23 +580,25 @@ def search_student():
     else:
         return render_template('user.html', data=data)
 # Tìm kiếm câu hỏi thuộc từng mô đun ==================================================================
-@app.route('/search', methods=['POST'])
+@app.route('/search-question', methods=['POST'])
 @login_required
-def search():
-    content = request.form['content']
-    collection_name = 'questions'
-    docs = db.collection(collection_name).where('content', '==', content).stream()
+def search_question():
+    module_id = request.form['module_id']
+    search_query = request.form['search_query']
+    collection_name = 'module'
+    doc_ref = db.collection(collection_name).document(module_id)
+    module_data = doc_ref.get().to_dict()
+    questions_ref = db.collection(collection_name).document(module_id).collection('questions')
+    questions_query = questions_ref.where('content', '>=', search_query).where('content', '<=', search_query + u'\ufffd')
+    docs = questions_query.stream()
 
     data = []
-    for doc in docs:
+    for i, doc in enumerate(docs, start=1):
         doc_data = doc.to_dict()
-        doc_data['id'] = doc.id
-        data.append(doc_data)
+        doc_data['id'] = doc.id  # Add the document ID to the data dictionary
+        data.append({'row_number': i, **doc_data})
 
-    if len(data) == 0:
-        return render_template('notify.html', message='Không tìm thấy câu hỏi với nội dung này')
-    else:
-        return render_template('questions.html', data=data, module_id=module_id)
+    return render_template('listquestions.html', data=data, module_id=module_id, search_query=search_query)
 
 if __name__ == '__main__':
     app.run(debug=True)
